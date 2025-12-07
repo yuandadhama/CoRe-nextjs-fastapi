@@ -81,7 +81,7 @@ async def register_with_email(register_data: EmailRegisterRequest, db: db_depend
     # Check email duplikat
     existing_email = db.query(Users).filter(Users.email == register_data.email).first()
     if existing_email:
-        raise HTTPException(status_code=400, detail="Email already exists")
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_pwd = bcrypt_context.hash(register_data.password)
 
@@ -105,6 +105,7 @@ async def register_with_email(register_data: EmailRegisterRequest, db: db_depend
 @router.post("/set-username", status_code=status.HTTP_200_OK)
 async def set_username(data: UsernameRequest, db: db_dependency):
 
+    print(data)
     user = db.query(Users).filter(Users.email == data.email).first()
 
     if not user:
@@ -213,5 +214,11 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         )
         
 @router.get("/me")
-def get_me(current_user: dict = Depends(get_current_user)):
-    return current_user
+def get_me(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(Users).filter(Users.id == current_user["id"]).first()
+
+    return {
+        "id": user.id, # type: ignore
+        "username": user.username, # type: ignore
+        "email": user.email # type: ignore
+    }

@@ -16,7 +16,7 @@ export default function SummaryPage() {
       {/* Tombol Back */}
       <button
         onClick={() => router.push("/dashboard")}
-        className="absolute left-6 top-6 flex items-center gap-2 text-gray-300 hover:text-white transition"
+        className="absolute left-6 top-6 flex items-center gap-2 text-gray-300 hover:text-white transition cursor-pointer"
       >
         <ArrowLeft size={20} />
         <span>Dashboard</span>

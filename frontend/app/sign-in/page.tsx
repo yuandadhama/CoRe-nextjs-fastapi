@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-// Lucide icons
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 export default function SignInPage() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -22,7 +22,7 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/auth/login", {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -42,7 +42,6 @@ export default function SignInPage() {
 
       router.push("/dashboard");
     } catch (error) {
-      console.error(error);
       setErrorMsg("Failed to connect to server");
     } finally {
       setLoading(false);
@@ -50,47 +49,52 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white relative">
-      {/* ⬅ BACK BUTTON (TOP LEFT) */}
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-950 text-white">
+      {/* Gradient Blobs */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-600/20 blur-[180px] rounded-full" />
+      <div className="absolute bottom-0 right-0 w-[450px] h-[450px] bg-blue-600/20 blur-[180px] rounded-full" />
+
+      {/* Back Button */}
       <button
         onClick={() => router.push("/")}
-        className="absolute top-5 left-5 flex items-center gap-2 text-gray-300 hover:text-white transition"
+        className="absolute top-6 left-6 flex items-center gap-2 text-gray-300 hover:text-white transition cursor-pointer"
       >
         <ArrowLeft size={20} />
         <span className="text-sm">Back</span>
       </button>
 
-      <div className="bg-gray-900 p-8 rounded-2xl shadow-lg w-full max-w-md text-center">
-        <h1 className="text-2xl font-bold mb-2">Sign In</h1>
+      {/* Card */}
+      <div className="relative bg-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/10 animate-fadeIn">
+        <h1 className="text-3xl font-semibold mb-2">Welcome Back</h1>
+        <p className="text-gray-300 text-sm">
+          Sign in to continue your journey.
+        </p>
 
         <form onSubmit={handleSignIn} className="space-y-4 mt-6">
           <input
             type="email"
             placeholder="Email"
-            className="w-full p-3 rounded-lg bg-gray-800 text-gray-200 
-              focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          {/* PASSWORD FIELD */}
+          {/* Password */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className="w-full p-3 rounded-lg bg-gray-800 text-gray-200 
-                pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-gray-200 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
 
-            {/* LUCIDE ICON EYE */}
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
               onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 cursor-pointer"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -98,20 +102,15 @@ export default function SignInPage() {
 
           {errorMsg && <p className="text-red-400 text-sm">{errorMsg}</p>}
 
-          {/* SIGN IN BUTTON */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full p-3 rounded-lg font-semibold transition-colors 
-              ${
-                loading
-                  ? "bg-blue-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            className="w-full p-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold transition-all shadow-lg hover:shadow-indigo-700/20 
+            disabled:bg-indigo-400 disabled:cursor-not-allowed cursor-pointer"
           >
             {loading ? (
               <div className="flex justify-center items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
               "Sign In"
@@ -119,9 +118,9 @@ export default function SignInPage() {
           </button>
         </form>
 
-        <p className="text-gray-400 text-sm mt-6">
+        <p className="text-gray-300 text-sm mt-6">
           Don't have an account?{" "}
-          <Link href="/sign-up" className="text-blue-400 hover:underline">
+          <Link href="/sign-up" className="text-indigo-400 hover:underline">
             Sign up
           </Link>
         </p>

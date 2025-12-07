@@ -1,13 +1,18 @@
 "use client";
 
 import Button from "@/components/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function AcademicBackground() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   const router = useRouter();
 
+  // ==============================
+  // STATE
+  // ==============================
   const [math, setMath] = useState("85");
   const [science, setScience] = useState("85");
   const [english, setEnglish] = useState("85");
@@ -24,9 +29,45 @@ export default function AcademicBackground() {
   const [selectedInterest, setSelectedInterest] = useState<string | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // <-- for route protection
+  const [submitting, setSubmitting] = useState(false);
 
-  // Handle submit to backend
+  // ==============================
+  // ROUTE PROTECTION
+  // ==============================
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const verifyUser = async () => {
+      try {
+        const res = await fetch(`${API_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+          localStorage.removeItem("access_token");
+          router.push("/sign-in");
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        localStorage.removeItem("access_token");
+        router.push("/sign-in");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyUser();
+  }, [router]);
+
+  // ==============================
+  // SUBMIT FORM
+  // ==============================
   const handleSubmit = async () => {
     if (!selectedInterest || !selectedGoal) {
       alert("Please select your main interest and career goal.");
@@ -42,15 +83,18 @@ export default function AcademicBackground() {
     };
 
     try {
-      setLoading(true);
+      setSubmitting(true);
 
-      const res = await fetch("http://127.0.0.1:8000/recommendations", {
+      const res = await fetch(`${API_URL}/recommendations`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json(); // <-- cukup sekali
+      const data = await res.json();
 
       if (!res.ok) {
         alert(data.detail || "Failed to process recommendation.");
@@ -64,38 +108,68 @@ export default function AcademicBackground() {
       console.error(err);
       alert("Something went wrong, try again.");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
+  // ==============================
+  // LOADING PROTECTION UI
+  // ==============================
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0F1C] text-white">
+        <div className="animate-pulse text-gray-400">
+          Checking authentication...
+        </div>
+      </div>
+    );
+  }
+
+  // ==============================
+  // MAIN UI
+  // ==============================
   return (
-    <div className="min-h-screen bg-[#0A0F1C] text-white flex flex-col items-center px-6 py-10 relative">
+    <div className="min-h-screen bg-linear-to-br from-[#0A0F1C] via-[#0D1220] to-[#04070F] text-white px-6 py-10 flex flex-col items-center relative">
       {/* Back Button */}
       <button
         onClick={() => router.push("/dashboard")}
-        className="absolute left-6 top-6 flex items-center gap-2 text-gray-300 hover:text-white transition"
+        className="absolute left-6 top-6 flex items-center gap-2 text-gray-300 hover:text-white transition cursor-pointer"
       >
         <ArrowLeft size={20} />
-        <span>Back</span>
+        <span className="font-medium">Back</span>
       </button>
 
-      {/* Main Container */}
-      <div className="bg-[#111827] w-full max-w-2xl rounded-2xl p-10 shadow-xl mt-14">
-        <h1 className="text-2xl font-semibold text-center mb-12">
-          Tell us about your academic background
+      {/* Main Card */}
+      <div
+        className="
+          w-full max-w-2xl bg-white/5 rounded-3xl p-10 mt-14
+          shadow-[0_0_40px_rgba(0,0,0,0.25)]
+          backdrop-blur-lg border border-white/10
+        "
+      >
+        <h1 className="text-3xl font-bold text-center mb-2">
+          Academic Background
         </h1>
+        <p className="text-center text-gray-400 mb-10">
+          Help us understand your strengths so we can give accurate
+          recommendations.
+        </p>
 
-        {/* Grade Inputs */}
+        {/* Grades Section */}
         <div className="grid grid-cols-2 gap-y-8 gap-x-6">
           {[
             { label: "Math Grade Average", value: math, set: setMath },
             { label: "Science Grade Average", value: science, set: setScience },
             { label: "English Grade Average", value: english, set: setEnglish },
           ].map((field) => (
-            <div className="flex flex-col" key={field.label}>
-              <p className="mb-2">{field.label}</p>
+            <div key={field.label} className="flex flex-col">
+              <p className="mb-2 font-medium">{field.label}</p>
               <input
-                className="bg-[#1A2233] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="
+                  bg-[#131A29] border border-white/10 rounded-xl px-3 py-2 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                  transition
+                "
                 value={field.value}
                 type="number"
                 max={100}
@@ -108,20 +182,21 @@ export default function AcademicBackground() {
 
         {/* Interests */}
         <div className="mt-12">
-          <p className="mb-3 text-lg font-medium">
-            What is your main interest?
-          </p>
+          <p className="text-lg font-semibold mb-3">Your Main Interest</p>
+
           <div className="flex gap-3 flex-wrap">
             {interests.map((item) => (
               <button
                 key={item}
                 onClick={() => setSelectedInterest(item)}
-                className={`px-4 py-2 rounded-xl transition-all border 
+                className={`
+                  px-5 py-2.5 text-sm rounded-xl border transition-all cursor-pointer
                   ${
                     selectedInterest === item
-                      ? "bg-blue-600 border-blue-400 shadow-lg scale-[1.03]"
-                      : "bg-[#1A2233] border-transparent hover:bg-[#1F2A3E] hover:border-gray-600"
-                  }`}
+                      ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/20 scale-[1.04]"
+                      : "bg-[#131A29] border-white/10 hover:bg-[#1A2233]"
+                  }
+                `}
               >
                 {item}
               </button>
@@ -129,22 +204,23 @@ export default function AcademicBackground() {
           </div>
         </div>
 
-        {/* Goals */}
+        {/* Career Goal */}
         <div className="mt-12">
-          <p className="mb-3 text-lg font-medium">
-            What is your main career goal?
-          </p>
+          <p className="text-lg font-semibold mb-3">Your Career Goal</p>
+
           <div className="flex gap-3 flex-wrap">
             {goals.map((item) => (
               <button
                 key={item}
                 onClick={() => setSelectedGoal(item)}
-                className={`px-4 py-2 rounded-xl transition-all border
+                className={`
+                  px-5 py-2.5 text-sm rounded-xl border transition-all cursor-pointer
                   ${
                     selectedGoal === item
-                      ? "bg-blue-600 border-blue-400 shadow-lg scale-[1.03]"
-                      : "bg-[#1A2233] border-transparent hover:bg-[#1F2A3E] hover:border-gray-600"
-                  }`}
+                      ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/20 scale-[1.04]"
+                      : "bg-[#131A29] border-white/10 hover:bg-[#1A2233]"
+                  }
+                `}
               >
                 {item}
               </button>
@@ -153,11 +229,11 @@ export default function AcademicBackground() {
         </div>
 
         {/* Submit Button */}
-        <div className="mt-12 flex justify-center">
+        <div className="mt-12 flex justify-center cursor-pointer">
           <Button
-            text={loading ? "Processing..." : "Submit"}
+            text={submitting ? "Processing..." : "Submit"}
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={submitting}
           />
         </div>
       </div>
