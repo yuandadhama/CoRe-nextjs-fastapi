@@ -1,23 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function CreateUsernamePage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const router = useRouter();
-  const params = useSearchParams();
 
-  const email = params.get("email");
+  const [email, setEmail] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
   const [isValid, setIsValid] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  // Ambil query param lewat window (client only)
   useEffect(() => {
-    if (!email) router.push("/sign-up");
-  }, [email, router]);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get("email");
+
+      if (!emailParam) {
+        router.push("/sign-up");
+      } else {
+        setEmail(emailParam);
+      }
+    }
+  }, [router]);
 
   useEffect(() => {
     if (username.length === 0) return setIsValid(true);
@@ -64,13 +73,11 @@ export default function CreateUsernamePage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 text-white overflow-hidden bg-linear-to-br from-[#0a0a0f] via-[#111827] to-[#0f172a]">
-      {/* Background Glow Circles */}
       <div className="absolute top-10 left-10 w-72 h-72 bg-blue-600/20 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-10 right-10 w-72 h-72 bg-purple-600/20 blur-[120px] rounded-full"></div>
 
       <div className="relative z-10 w-full max-w-md">
         <div className="backdrop-blur-xl bg-white/5 border border-white/10 p-8 rounded-2xl shadow-2xl animate-fadeInUp">
-          {/* Title */}
           <h1 className="text-3xl font-bold tracking-wide">
             Create Your Identity
           </h1>
@@ -78,10 +85,8 @@ export default function CreateUsernamePage() {
             This username will represent you across the app.
           </p>
 
-          {/* Email Info */}
           <p className="text-blue-400 text-sm font-medium mt-2">{email}</p>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 mt-8">
             <div className="text-left">
               <label className="text-sm text-gray-300 mb-1 block">
@@ -105,7 +110,6 @@ export default function CreateUsernamePage() {
               </p>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={username.length < 3 || loading}
@@ -126,7 +130,6 @@ export default function CreateUsernamePage() {
             </button>
           </form>
 
-          {/* Message */}
           {message && (
             <p
               className={`text-sm mt-4 text-center ${
