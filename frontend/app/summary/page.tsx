@@ -5,8 +5,17 @@ export const dynamic = "force-dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Button from "@/components/Button";
+import { Suspense } from "react";
 
-export default function SummaryPage() {
+export default function Summary() {
+  return (
+    <Suspense>
+      <SummaryPage />
+    </Suspense>
+  );
+}
+
+function SummaryPage() {
   const router = useRouter();
   const params = useSearchParams();
 
