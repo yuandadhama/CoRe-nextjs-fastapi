@@ -199,7 +199,7 @@ export default function HomePage() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-          {historyData.length === 0 ? (
+          {historyData?.length === 0 ? (
             <>
               <p className="text-gray-400 col-span-full">No history found.</p>
               <Link
@@ -210,7 +210,7 @@ export default function HomePage() {
               </Link>
             </>
           ) : (
-            historyData.map((item) => (
+            historyData?.map((item) => (
               <div
                 key={item.id}
                 className="relative bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md shadow-lg hover:bg-white/10 transition"
