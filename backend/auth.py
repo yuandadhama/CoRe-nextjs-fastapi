@@ -156,7 +156,7 @@ async def login_for_access_token(login_data: LoginRequest, db: db_dependency):
     access_token = create_access_token(
         user_id=user.id, # type: ignore
         username=user.username, # type: ignore
-        expires_delta=timedelta(minutes=30)
+        expires_delta=timedelta(days=1)
     )
 
     return {

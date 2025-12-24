@@ -10,7 +10,7 @@ export default function LandingPage() {
   const [btnLoading, setBtnLoading] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
     if (token) setLoggedIn(true);
     setLoading(false);
   }, []);
@@ -24,7 +24,7 @@ export default function LandingPage() {
   }
 
   if (loggedIn) {
-    router.push("/home");
+    router.push("/dashboard");
     return null;
   }
 

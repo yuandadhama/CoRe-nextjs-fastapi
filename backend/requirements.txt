@@ -6,8 +6,8 @@ pydantic
 python-dotenv
 passlib[bcrypt]
 python-jose
-psycopg2-binary
 pandas
 scikit-learn
 joblib
 numpy
+

@@ -99,6 +99,7 @@ export default function SignUpEmailPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+          {/* Email */}
           <input
             type="email"
             placeholder="Email"
