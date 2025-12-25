@@ -69,7 +69,8 @@ export default function SignUpEmailPage() {
       }
 
       router.push(`/create-username?email=${email}`);
-    } catch {
+    } catch (error) {
+      console.error("Error during registration:", error);
       setGeneralError("Something went wrong");
     } finally {
       setLoading(false);
