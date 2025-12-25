@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 
 export default function AcademicBackground() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
   const router = useRouter();
 
   // ==============================
@@ -29,8 +28,17 @@ export default function AcademicBackground() {
   const [selectedInterest, setSelectedInterest] = useState<string | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(true); // <-- for route protection
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // Modal state
+  const [errorModal, setErrorModal] = useState<{
+    open: boolean;
+    message: string;
+  }>({
+    open: false,
+    message: "",
+  });
 
   // ==============================
   // ROUTE PROTECTION
@@ -66,11 +74,15 @@ export default function AcademicBackground() {
   }, [router]);
 
   // ==============================
-  // SUBMIT FORM
+  // SUBMIT
   // ==============================
   const handleSubmit = async () => {
     if (!selectedInterest || !selectedGoal) {
-      alert("Please select your main interest and career goal.");
+      setErrorModal({
+        open: true,
+        message:
+          "Please select your main interest and career goal before continuing.",
+      });
       return;
     }
 
@@ -97,7 +109,10 @@ export default function AcademicBackground() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.detail || "Failed to process recommendation.");
+        setErrorModal({
+          open: true,
+          message: data.detail || "Failed to process recommendation.",
+        });
         return;
       }
 
@@ -106,14 +121,17 @@ export default function AcademicBackground() {
       );
     } catch (err) {
       console.error(err);
-      alert("Something went wrong, try again.");
+      setErrorModal({
+        open: true,
+        message: "Something went wrong. Please try again.",
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
   // ==============================
-  // LOADING PROTECTION UI
+  // LOADING UI
   // ==============================
   if (loading) {
     return (
@@ -140,13 +158,7 @@ export default function AcademicBackground() {
       </button>
 
       {/* Main Card */}
-      <div
-        className="
-          w-full max-w-2xl bg-white/5 rounded-3xl p-10 mt-14
-          shadow-[0_0_40px_rgba(0,0,0,0.25)]
-          backdrop-blur-lg border border-white/10
-        "
-      >
+      <div className="w-full max-w-2xl bg-white/5 rounded-3xl p-10 mt-14 backdrop-blur-lg border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.25)]">
         <h1 className="text-3xl font-bold text-center mb-2">
           Academic Background
         </h1>
@@ -155,7 +167,7 @@ export default function AcademicBackground() {
           recommendations.
         </p>
 
-        {/* Grades Section */}
+        {/* Grades */}
         <div className="grid grid-cols-2 gap-y-8 gap-x-6">
           {[
             { label: "Math Grade Average", value: math, set: setMath },
@@ -165,15 +177,11 @@ export default function AcademicBackground() {
             <div key={field.label} className="flex flex-col">
               <p className="mb-2 font-medium">{field.label}</p>
               <input
-                className="
-                  bg-[#131A29] border border-white/10 rounded-xl px-3 py-2 
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                  transition
-                "
+                className="bg-[#131A29] border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 value={field.value}
                 type="number"
-                max={100}
                 min={0}
+                max={100}
                 onChange={(e) => field.set(e.target.value)}
               />
             </div>
@@ -183,20 +191,16 @@ export default function AcademicBackground() {
         {/* Interests */}
         <div className="mt-12">
           <p className="text-lg font-semibold mb-3">Your Main Interest</p>
-
           <div className="flex gap-3 flex-wrap">
             {interests.map((item) => (
               <button
                 key={item}
                 onClick={() => setSelectedInterest(item)}
-                className={`
-                  px-5 py-2.5 text-sm rounded-xl border transition-all cursor-pointer
-                  ${
-                    selectedInterest === item
-                      ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/20 scale-[1.04]"
-                      : "bg-[#131A29] border-white/10 hover:bg-[#1A2233]"
-                  }
-                `}
+                className={`px-5 py-2.5 text-sm rounded-xl border transition-all cursor-pointer ${
+                  selectedInterest === item
+                    ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/20 scale-[1.04]"
+                    : "bg-[#131A29] border-white/10 hover:bg-[#1A2233]"
+                }`}
               >
                 {item}
               </button>
@@ -204,23 +208,19 @@ export default function AcademicBackground() {
           </div>
         </div>
 
-        {/* Career Goal */}
+        {/* Goals */}
         <div className="mt-12">
           <p className="text-lg font-semibold mb-3">Your Career Goal</p>
-
           <div className="flex gap-3 flex-wrap">
             {goals.map((item) => (
               <button
                 key={item}
                 onClick={() => setSelectedGoal(item)}
-                className={`
-                  px-5 py-2.5 text-sm rounded-xl border transition-all cursor-pointer
-                  ${
-                    selectedGoal === item
-                      ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/20 scale-[1.04]"
-                      : "bg-[#131A29] border-white/10 hover:bg-[#1A2233]"
-                  }
-                `}
+                className={`px-5 py-2.5 text-sm rounded-xl border transition-all cursor-pointer ${
+                  selectedGoal === item
+                    ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/20 scale-[1.04]"
+                    : "bg-[#131A29] border-white/10 hover:bg-[#1A2233]"
+                }`}
               >
                 {item}
               </button>
@@ -228,13 +228,61 @@ export default function AcademicBackground() {
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="mt-12 flex justify-center cursor-pointer">
+        {/* Submit */}
+        <div className="mt-12 flex justify-center">
           <Button
             text={submitting ? "Processing..." : "Submit"}
             onClick={handleSubmit}
             disabled={submitting}
           />
+        </div>
+      </div>
+
+      {/* Error Modal */}
+      {errorModal.open && (
+        <ErrorModal
+          message={errorModal.message}
+          onClose={() =>
+            setErrorModal({
+              open: false,
+              message: "",
+            })
+          }
+        />
+      )}
+    </div>
+  );
+}
+
+// ==============================
+// MODAL COMPONENT
+// ==============================
+function ErrorModal({
+  message,
+  onClose,
+}: {
+  message: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <div className="relative w-full max-w-md mx-4 bg-[#0F172A] border border-white/10 rounded-2xl p-6 shadow-[0_0_60px_rgba(0,0,0,0.6)] animate-in fade-in zoom-in duration-200">
+        <h2 className="text-xl font-semibold mb-2">Incomplete Information</h2>
+
+        <p className="text-gray-400 mb-6 leading-relaxed">{message}</p>
+
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-medium transition"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>

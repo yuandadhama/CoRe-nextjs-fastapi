@@ -49,7 +49,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-950 text-white">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-950 text-white px-6">
       {/* Gradient Blobs */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-600/20 blur-[180px] rounded-full" />
       <div className="absolute bottom-0 right-0 w-[450px] h-[450px] bg-blue-600/20 blur-[180px] rounded-full" />

@@ -14,8 +14,6 @@ export default function SignUpEmailPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
 
-  const [disabled, setDisabled] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -78,7 +76,7 @@ export default function SignUpEmailPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-950 text-white">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-950 text-white px-6">
       {/* Gradient Blobs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/20 blur-[200px] rounded-full" />
       <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-purple-600/20 blur-[200px] rounded-full" />
