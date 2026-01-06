@@ -1,5 +1,6 @@
 # CoRe – AI-Based Course Recommendation System
 
+link: https://co-re-nextjs-fastapi.vercel.app/
 CoRe is a full stack web application developed as a project for the **Introduction to Artificial Intelligence** course.  
 The system provides **personalized course or field recommendations** based on academic performance, interests, and career goals using a machine learning model.
 
